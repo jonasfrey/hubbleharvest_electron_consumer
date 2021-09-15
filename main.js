@@ -1,12 +1,18 @@
 // Modules to control application life and create native browser window
 const {app, BrowserWindow} = require('electron')
 const path = require('path')
+const wallpaper = require('wallpaper');
+const os = require('os');
+const fs = require('fs');
+const http = require('http');
+const Stream = require('stream').Transform;
+
 
 function createWindow () {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 800,
-    height: 600,
+    height: 600,  
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')
     }
@@ -14,6 +20,45 @@ function createWindow () {
 
   // and load the index.html of the app.
   mainWindow.loadFile('index.html')
+
+
+  var downloaded_images_path = "./downloaded_images/"; 
+  var filename = Date.now()+'.jpg'
+  var pic_path = downloaded_images_path+filename
+  
+  if (!fs.existsSync(downloaded_images_path)){
+      fs.mkdirSync(downloaded_images_path);
+  }
+
+  http.request("http://hubbleharvest.ch:8080", function(response) {                                        
+    var data = new Stream();                                                    
+  
+    response.on('data', function(chunk) {                                       
+      data.push(chunk);                                                         
+    });                                                                         
+  
+    response.on('end', function() { 
+
+      fs.writeFileSync(pic_path, data.read());    
+      
+      
+      wallpaper.set(pic_path, {scale: "stretch"})
+      .then(() => {
+        console.log(path.resolve(pic_path));
+        //this.$snackbar.open("Done !");
+      });
+
+
+    });                                                                         
+  }).end();
+
+  
+
+    //let picturePath = path.join(", "os.homedir(), "/PicturesHaeckel_Blastoidea.jpg");
+    //picturePath = path.normalize(picturePath);
+    //fs.writeFile(picturePath, base64Image, 'base64', (err) => {
+    //});
+  
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
