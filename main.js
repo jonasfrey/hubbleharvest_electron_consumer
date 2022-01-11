@@ -26,6 +26,11 @@ function createWindow () {
   var filename = Date.now()+'.jpg'
   var pic_path = downloaded_images_path+filename
   
+
+    // main process
+    mainWindow.webContents.send('store-data', [123]);
+
+
   if (!fs.existsSync(downloaded_images_path)){
       fs.mkdirSync(downloaded_images_path);
   }
@@ -41,12 +46,14 @@ function createWindow () {
 
       fs.writeFileSync(pic_path, data.read());    
       
-      
-      wallpaper.set(pic_path, {scale: "stretch"})
+      //'auto' | 'fill' | 'fit' | 'stretch' | 'center'
+      wallpaper.set(pic_path, {scale: "center"})
       .then(() => {
         console.log(path.resolve(pic_path));
         //this.$snackbar.open("Done !");
       });
+
+
 
 
     });                                                                         
@@ -86,3 +93,4 @@ app.on('window-all-closed', function () {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
